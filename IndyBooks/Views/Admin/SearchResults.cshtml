@@ -1,0 +1,58 @@
+﻿@model IEnumerable<IndyBooks.Models.Book>
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+    ViewBag.Title = "Admin Search";
+    Layout = "_Layout";
+}
+
+<h3>Search Result</h3>
+
+
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.Title)
+        </th>
+        <th>
+            <!-- Use the Name property of the Book's Author entity-->
+            @Html.DisplayNameFor(model => model.Author.Name)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.SKU)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Price)
+        </th>
+        <th>
+            Action
+        </th>
+    </tr>
+
+    @foreach (var book in Model)
+    {
+        <tr>
+            <td>
+                @book.Title
+            </td>
+            <td>
+                <!-- Use the Name property of the Book's Author entity-->
+                @book.Author.Name
+            </td>
+            <td class="rightedge">
+                @book.SKU
+            </td>
+            <td class="rightedge">
+                $@book.Price
+            </td>
+            <td class="rightedge">
+                <!-- TODO: Note how the book Id is set into each "Remove" link in the list -->
+                <a asp-action="DeleteBook" asp-controller="Admin"
+                   asp-route-id="@book.Id">Remove</a> | 
+                <!-- TODO: BONUS: Add an "Update action link here-->
+            </td>
+        </tr>
+    }
+
+</table>
+
+
