@@ -16,7 +16,7 @@
       }
     },
     "IndyBooks": {
-      "commandName": "Project",
+      "commandName": "IndyBooks",
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"

@@ -13,14 +13,10 @@ namespace IndyBooks
 {
     public class Startup
     {
-        private readonly IConfigurationRoot configuration;
-
-        public Startup(IHostingEnvironment env)
+        public IConfiguration Configuration { get; }
+        public Startup(IConfiguration configuration)
         {
-            configuration = new ConfigurationBuilder()
-                                .AddEnvironmentVariables()
-                                .AddJsonFile(env.ContentRootPath + "/appsettings.json")
-                                .Build();
+            Configuration = configuration;
         }
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
@@ -29,24 +25,24 @@ namespace IndyBooks
             services.AddMvc();
             services.AddDbContext<Models.IndyBooksDataContext>(options =>
             {
-                var connectionString = configuration.GetConnectionString("IndyBooks");
-                options.UseSqlServer(connectionString);
+                //options.UseSqlServer(Configuration.GetConnectionString("IndyBooks-Win-SqlServer"));
+                options.UseSqlite(Configuration.GetConnectionString("IndyBooks-Mac-Sqlite"));
             });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app)
         {
-            if (env.IsDevelopment())
+            app.UseRouting();
+            app.UseDeveloperExceptionPage();
+            app.UseEndpoints(endpoints =>
             {
-                app.UseDeveloperExceptionPage();
-            }
-            app.UseMvc(routes =>
-            {
-                routes.MapRoute("Default",
-                    "{controller=Admin}/{action=Search}");
+                endpoints.MapControllerRoute(
+                     name: "default",
+                     pattern: "{controller}/{action}/{id:long?}",
+                     defaults: new { controller = "Admin", action = "Search" }
+                );
             });
-
             app.UseStaticFiles();
         }
     }

@@ -6,6 +6,9 @@
 [Bb]in/
 packages/
 TestResults/
+*.db
+*.db-wal
+*.db-shm
 
 # globs
 Makefile.in
