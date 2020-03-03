@@ -40,7 +40,7 @@ namespace IndyBooks
                 endpoints.MapControllerRoute(
                      name: "default",
                      pattern: "{controller}/{action}/{id:long?}",
-                     defaults: new { controller = "Admin", action = "Search" }
+                     defaults: new { controller = "Admin", action = "Index" }
                 );
             });
             app.UseStaticFiles();

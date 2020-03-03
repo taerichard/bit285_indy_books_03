@@ -5,7 +5,7 @@
     ViewBag.Title = "Add Book";
 }
 <h3>Add New Book</h3>
-<form asp-action="CreateBook" asp-controller="Admin">
+<form asp-action="CreateBook" asp-controller="Admin" asp-route-id="@Model.Id">
     <div>
         <label asp-for="@Model.Title"></label>
         <input asp-for="@Model.Title" />
@@ -17,12 +17,18 @@
             <option>Please select one</option>
         </select>
         OR
-        <label>enter new Author: </label>
-        <!-- TODO: Add an input field needed for the Author's Name -->
+        <label asp-for="@Model.Name"></label>
+        <input asp-for="@Model.Name" />
 
     </div>
     <!-- TODO: Add the rest of the label and input fields needed for a Book-->
-
-
+    <div>
+        <label asp-for="@Model.SKU"></label>
+        <input asp-for="@Model.SKU" />
+    </div>
+    <div>
+        <label asp-for="@Model.Price"></label>
+        <input asp-for="@Model.Price" />
+    </div>
     <input type="submit" value="Submit" />
 </form>

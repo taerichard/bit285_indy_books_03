@@ -11,17 +11,16 @@
 <table class="table">
     <tr>
         <th>
-            @Html.DisplayNameFor(model => model.Title)
+            Title
         </th>
         <th>
-            <!-- Use the Name property of the Book's Author entity-->
-            @Html.DisplayNameFor(model => model.Author.Name)
+            Author
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.SKU)
+            SKU
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.Price)
+            Price
         </th>
         <th>
             Action
@@ -42,13 +41,13 @@
                 @book.SKU
             </td>
             <td class="rightedge">
-                $@book.Price
+                $@book.Price.ToString("#.00")
             </td>
             <td class="rightedge">
                 <!-- TODO: Note how the book Id is set into each "Remove" link in the list -->
                 <a asp-action="DeleteBook" asp-controller="Admin"
                    asp-route-id="@book.Id">Remove</a> | 
-                <!-- TODO: BONUS: Add an "Update action link here-->
+                <!-- TODO: Add an "Update action link here-->
             </td>
         </tr>
     }

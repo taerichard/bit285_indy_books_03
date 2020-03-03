@@ -20,38 +20,46 @@ namespace IndyBooks.Controllers
         [HttpGet]
         public IActionResult CreateBook()
         {
-            return View("AddBook");
+            //TODO: Populate a new AddBookViewModel object with a complete set of Writers
+            //      and send it on to the View "AddBook"
+
+            return View();
         }
         [HttpPost]
-        public IActionResult CreateBook(AddBookViewModel newBook)
+        public IActionResult CreateBook(AddBookViewModel bookVM)
         {
-            //TODO: Build the Author from either the AuthorId (if it is > 0), or the Name
+            //TODO: Build the Writer object using the parameter
             Writer author;
             
 
-            //TODO: Build the Book using the newBook data and your newly created author.
+            //TODO: Build the Book using the parameter data and your newly created author.
             Book book; 
 
             //TODO: Add author and book to their DbSets; SaveChanges
            
 
-            //Shows the new book using the Index View 
-            return RedirectToAction("Index");
+            //Shows the book using the Index View 
+            return RedirectToAction("Index", new { id = bookVM.Id });
         }
         /***
          * READ       
          */
         [HttpGet]
-        public IActionResult Index()
+        public IActionResult Index(long id)
         {
-            //TODO: Use lambda methods on _db.Books as described by the variable name
-            var allBooksWithAuthorsOrderedbySKU = _db.Books;
-            return View("SearchResults", allBooksWithAuthorsOrderedbySKU);
+            IQueryable<Book> books = _db.Books;
+            //TODO: filter books by the id (if passed an id as its Route Parameter),
+            //     otherwise use the entire collection of Books, ordered by SKU.
+
+
+            return View("SearchResults", books);
         }
         /***
          * UPDATE
          */
-         //TODO: BONUS - Write an method that take a book id, and loads the book data in to the AddBook View
+         //TODO: Write a method to take a book id, and load book and author info
+         //      into the ViewModel for the AddBook View
+         [HttpGet]
 
         /***
          * DELETE
@@ -62,7 +70,7 @@ namespace IndyBooks.Controllers
             //TODO: Remove the Book associated with the given id number; Save Changes
 
 
-            return RedirectToAction("Search");
+            return RedirectToAction("Index");
         }
 
         [HttpGet]
@@ -78,17 +86,17 @@ namespace IndyBooks.Controllers
             {
                 foundBooks = foundBooks
                             .Where(b => b.Title.Contains(search.Title))
-                            .OrderBy(b => b.Title)
+                            .OrderBy(b => b.Author.Name)
                             ;
             }
 
             //Author's Last Name Search
-            if (search.AuthorLastName != null)
+            if (search.AuthorName != null)
             {
                 //Use the Name property of the Book's Author entity
                 foundBooks = foundBooks
                             .Include(b => b.Author)
-                            .Where(b => b.Author.Name.EndsWith(search.AuthorLastName, StringComparison.CurrentCulture))
+                            .Where(b => b.Author.Name.Contains(search.AuthorName, StringComparison.CurrentCulture))
                             ;
             }
             //Priced Between Search (min and max price entered)
@@ -96,8 +104,7 @@ namespace IndyBooks.Controllers
             {
                 foundBooks = foundBooks
                             .Where(b => b.Price >= search.MinPrice && b.Price <= search.MaxPrice)
-                            .Select(b => new Book { Author = b.Author })
-                            .Distinct()
+                            .OrderByDescending(b=>b.Price)
                             ;
             }
             //Highest Priced Book Search (only max price entered)
@@ -109,7 +116,7 @@ namespace IndyBooks.Controllers
                             ;
             }
             //Composite Search Results
-            return View("SearchResults", foundBooks.Include(b => b.Author));
+            return View("SearchResults", foundBooks);
         }
 
     }
