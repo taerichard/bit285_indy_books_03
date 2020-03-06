@@ -29,17 +29,37 @@ namespace IndyBooks.Controllers
         public IActionResult CreateBook(AddBookViewModel bookVM)
         {
             //TODO: Build the Writer object using the parameter
-            Writer author;
-            
+            Book book;
+            Writer writer;
+
+            if (bookVM.AuthorId != null)
+            {
+                 writer = _db.Writers
+                    .FirstOrDefault(w => w.Id == bookVM.AuthorId);
+            }
+            else
+            {
+                writer = new Writer
+                {
+                    Name = bookVM.Name,
+                };
+            }
+
+            book = new Book
+            {
+                Author = writer,
+                Price = bookVM.Price,
+                SKU = bookVM.SKU
+            };
 
             //TODO: Build the Book using the parameter data and your newly created author.
-            Book book; 
 
             //TODO: Add author and book to their DbSets; SaveChanges
-           
-
+            _db.Writers.Add(writer);
+            _db.Books.Add(book);
+            _db.SaveChanges();
             //Shows the book using the Index View 
-            return RedirectToAction("Index", new { id = bookVM.Id });
+            return RedirectToAction("Index", new { id = book.Id });
         }
         /***
          * READ       
@@ -47,12 +67,23 @@ namespace IndyBooks.Controllers
         [HttpGet]
         public IActionResult Index(long id)
         {
-            IQueryable<Book> books = _db.Books;
+            var books = _db.Books
+                .Include(b => b.Author).ToList();
+
             //TODO: filter books by the id (if passed an id as its Route Parameter),
             //     otherwise use the entire collection of Books, ordered by SKU.
+            if(id == 0)
+            {
+                return View("SearchResults", books.OrderBy(b => b.SKU));
+            }
+            else
+            {
+                var booksById = books
+                    .OrderBy(b => b.SKU)
+                    .Where(b => b.Id == id);
 
-
-            return View("SearchResults", books);
+                return View("SearchResults", booksById);
+            }         
         }
         /***
          * UPDATE
