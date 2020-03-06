@@ -22,8 +22,12 @@ namespace IndyBooks.Controllers
         {
             //TODO: Populate a new AddBookViewModel object with a complete set of Writers
             //      and send it on to the View "AddBook"
-
-            return View();
+            AddBookViewModel addBookViewModel = new AddBookViewModel()
+            {
+                Writers = _db.Writers
+            };
+            
+            return View("AddBook", addBookViewModel);
         }
         [HttpPost]
         public IActionResult CreateBook(AddBookViewModel bookVM)
@@ -91,7 +95,19 @@ namespace IndyBooks.Controllers
          //TODO: Write a method to take a book id, and load book and author info
          //      into the ViewModel for the AddBook View
          [HttpGet]
+         public IActionResult UpdateBook(long id)
+         {
+            Book book = _db.Books.Find(id);
 
+            AddBookViewModel addVookViewModel = new AddBookViewModel
+            {
+                Title = book.Title,
+                Price = book.Price,
+                SKU = book.SKU
+            };
+
+            return RedirectToAction("CreateBook", addVookViewModel);
+         }
         /***
          * DELETE
          */
