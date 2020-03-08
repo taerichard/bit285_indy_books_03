@@ -33,38 +33,39 @@ namespace IndyBooks.Controllers
         public IActionResult CreateBook(AddBookViewModel bookVM)
         {
             //TODO: Build the Writer object using the parameter
-            Book book;
-            Writer writer;
+            Writer author = new Writer();
+            
+            author = _db.Writers
+            .FirstOrDefault(w => w.Id == bookVM.AuthorId);
 
-            if (bookVM.AuthorId != null)
+            Book book = _db.Books.Include(b => b.Author).SingleOrDefault(a => a.Id == bookVM.Id);
+
+            // author doesnt exist
+            if (author == null)
             {
-                 writer = _db.Writers
-                    .FirstOrDefault(w => w.Id == bookVM.AuthorId);
-            }
-            else
-            {
-                writer = new Writer
+                Writer newAuthor = new Writer
                 {
-                    Name = bookVM.Name,
+                    Name = bookVM.Name
                 };
+
+                _db.Writers.Add(newAuthor);
+                _db.SaveChanges();
             }
 
-            book = new Book
+            
+            if(book == null)
             {
-                Author = writer,
-                Price = bookVM.Price,
-                SKU = bookVM.SKU
-            };
+                
+            }
 
             //TODO: Build the Book using the parameter data and your newly created author.
-
+      
             //TODO: Add author and book to their DbSets; SaveChanges
-            _db.Writers.Add(writer);
-            _db.Books.Add(book);
-            _db.SaveChanges();
+
             //Shows the book using the Index View 
             return RedirectToAction("Index", new { id = book.Id });
         }
+}
         /***
          * READ       
          */
