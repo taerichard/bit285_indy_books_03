@@ -26,7 +26,7 @@ namespace IndyBooks.Controllers
             {
                 Writers = _db.Writers
             };
-            
+
             return View("AddBook", addBookViewModel);
         }
         [HttpPost]
@@ -34,38 +34,60 @@ namespace IndyBooks.Controllers
         {
             //TODO: Build the Writer object using the parameter
             Writer author = new Writer();
-            
+
             author = _db.Writers
-            .FirstOrDefault(w => w.Id == bookVM.AuthorId);
+              .FirstOrDefault(w => w.Id == bookVM.AuthorId);
 
-            Book book = _db.Books.Include(b => b.Author).SingleOrDefault(a => a.Id == bookVM.Id);
-
-            // author doesnt exist
             if (author == null)
             {
                 Writer newAuthor = new Writer
                 {
-                    Name = bookVM.Name
+                    Name = bookVM.Name,
                 };
-
-                _db.Writers.Add(newAuthor);
+                author = newAuthor;
+                _db.Add<Writer>(author);
                 _db.SaveChanges();
             }
 
-            
-            if(book == null)
+            // finding exisiting book in system looking for same author
+            //TODO: Build the Book using the parameter data and your newly created author.
+            Book book = _db.Books
+                .Include(a => a.Id == author.Id)
+                .SingleOrDefault(b => b.Id == bookVM.Id);
+
+            if (book == null)
             {
-                
+                Book newBook = new Book();
+                book = newBook;
+
+                 book = new Book
+                {
+                    Price = bookVM.Price,
+                    SKU = bookVM.SKU,
+                    Title = bookVM.Title,
+                    Author = book.Author
+                };
+
+                _db.Add<Book>(book);
+                _db.SaveChanges();
             }
 
-            //TODO: Build the Book using the parameter data and your newly created author.
-      
-            //TODO: Add author and book to their DbSets; SaveChanges
+            // if book doesnt exist
+            else
+            {
+                book.Id = bookVM.Id;
+                book.Price = bookVM.Price;
+                book.SKU = bookVM.SKU;
+                book.Title = bookVM.Title;
+                book.Author = author;
+            }
 
+            _db.Update<Book>(book);
+            _db.SaveChanges();
             //Shows the book using the Index View 
-            return RedirectToAction("Index", new { id = book.Id });
+            return RedirectToAction("Index", new { id = bookVM.Id });
         }
-}
+
         /***
          * READ       
          */
@@ -166,6 +188,5 @@ namespace IndyBooks.Controllers
             //Composite Search Results
             return View("SearchResults", foundBooks);
         }
-
     }
 }
