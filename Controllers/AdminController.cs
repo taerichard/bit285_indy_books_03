@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using IndyBooks.Models;
 using IndyBooks.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 namespace IndyBooks.Controllers
@@ -22,70 +23,66 @@ namespace IndyBooks.Controllers
         {
             //TODO: Populate a new AddBookViewModel object with a complete set of Writers
             //      and send it on to the View "AddBook"
+            var authorSelectOptions = _db.Writers.Select(a => new SelectListItem
+            {
+                Value = a.Id.ToString(),
+                Text = a.Name,
+                
+            }).ToList();
+                
             AddBookViewModel addBookViewModel = new AddBookViewModel()
             {
-                Writers = _db.Writers
+                Writers = authorSelectOptions
             };
 
             return View("AddBook", addBookViewModel);
         }
+
+        // Admin/CreateBook/
         [HttpPost]
         public IActionResult CreateBook(AddBookViewModel bookVM)
         {
             //TODO: Build the Writer object using the parameter
-            Writer author = new Writer();
-
-            author = _db.Writers
-              .FirstOrDefault(w => w.Id == bookVM.AuthorId);
+            Writer author = _db.Writers.SingleOrDefault(w => w.Id == bookVM.AuthorId);
 
             if (author == null)
             {
-                Writer newAuthor = new Writer
+                author = new Writer
                 {
-                    Name = bookVM.Name,
+                    Name = bookVM.Name
                 };
-                author = newAuthor;
-                _db.Add<Writer>(author);
-                _db.SaveChanges();
             }
 
-            // finding exisiting book in system looking for same author
-            //TODO: Build the Book using the parameter data and your newly created author.
-            Book book = _db.Books
-                .Include(a => a.Id == author.Id)
-                .SingleOrDefault(b => b.Id == bookVM.Id);
+            // check if book exist
+            Book book = _db.Books.SingleOrDefault(b => b.Id == bookVM.Id);
 
+            // add if book doesn't exist
             if (book == null)
             {
-                Book newBook = new Book();
-                book = newBook;
-
-                 book = new Book
+                // 
+                book = new Book
                 {
+                    Author = author,
                     Price = bookVM.Price,
                     SKU = bookVM.SKU,
-                    Title = bookVM.Title,
-                    Author = book.Author
+                    Title = bookVM.Title
                 };
 
-                _db.Add<Book>(book);
-                _db.SaveChanges();
+                _db.Books.Add(book);
             }
-
-            // if book doesnt exist
             else
             {
-                book.Id = bookVM.Id;
+                book.Author = author;
                 book.Price = bookVM.Price;
                 book.SKU = bookVM.SKU;
                 book.Title = bookVM.Title;
-                book.Author = author;
+     
+                _db.Books.Update(book);
             }
-
-            _db.Update<Book>(book);
             _db.SaveChanges();
+
             //Shows the book using the Index View 
-            return RedirectToAction("Index", new { id = bookVM.Id });
+            return RedirectToAction("Index", new { id = book.Id });
         }
 
         /***
@@ -94,20 +91,35 @@ namespace IndyBooks.Controllers
         [HttpGet]
         public IActionResult Index(long id)
         {
+            // get all books from db
+
             var books = _db.Books
-                .Include(b => b.Author).ToList();
+                .Include(b => b.Author)
+                .ToList();
+            // map book models to search result viewmodels
+
+            var searchViewModel = books.Select(b => new SearchResultViewModel
+            {
+                BookId = b.Id,
+                AuthorName = b.Author?.Name,
+                Price = b.Price,
+                SKU = b.SKU,
+                Title = b.Title
+            })
+            .OrderBy(b => b.SKU)
+            .ToList();
+                
 
             //TODO: filter books by the id (if passed an id as its Route Parameter),
             //     otherwise use the entire collection of Books, ordered by SKU.
             if(id == 0)
             {
-                return View("SearchResults", books.OrderBy(b => b.SKU));
+                return View("SearchResults", searchViewModel);
             }
             else
             {
-                var booksById = books
-                    .OrderBy(b => b.SKU)
-                    .Where(b => b.Id == id);
+                var booksById = searchViewModel
+                    .Where(b => b.BookId == id);
 
                 return View("SearchResults", booksById);
             }         
@@ -120,16 +132,29 @@ namespace IndyBooks.Controllers
          [HttpGet]
          public IActionResult UpdateBook(long id)
          {
-            Book book = _db.Books.Find(id);
+            Book book = _db.Books
+                .Include(b => b.Author)
+                .FirstOrDefault(b => b.Id == id);
+                
+            var authorSelectOptions = _db.Writers.Select(a => new SelectListItem
+            {
+                Value = a.Id.ToString(),
+                Text = a.Name, 
+                Selected = book.Author != null && book.Author.Id == a.Id
+            }).ToList();
 
-            AddBookViewModel addVookViewModel = new AddBookViewModel
+            AddBookViewModel addBookViewModel = new AddBookViewModel
             {
                 Title = book.Title,
                 Price = book.Price,
-                SKU = book.SKU
+                SKU = book.SKU,
+                Name = book.Author?.Name,
+                Writers = authorSelectOptions,
+                Id = book.Id,
+                AuthorId = book.Author?.Id
             };
 
-            return RedirectToAction("CreateBook", addVookViewModel);
+            return View("AddBook", addBookViewModel);
          }
         /***
          * DELETE
@@ -138,7 +163,13 @@ namespace IndyBooks.Controllers
         public IActionResult DeleteBook(long id)
         {
             //TODO: Remove the Book associated with the given id number; Save Changes
-
+            var book = _db.Books.Find(id);
+            
+            if(book != null)
+            {
+                _db.Books.Remove(book);
+                _db.SaveChanges();
+            }
 
             return RedirectToAction("Index");
         }

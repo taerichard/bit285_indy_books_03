@@ -21,6 +21,5 @@
     <Folder Include="Views\Admin\" />
     <Folder Include="wwwroot\" />
     <Folder Include="Controllers\" />
-    <Folder Include="ViewModels\" />
   </ItemGroup>
 </Project>

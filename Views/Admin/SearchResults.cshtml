@@ -1,4 +1,4 @@
-﻿@model IEnumerable<IndyBooks.Models.Book>
+﻿@model IEnumerable<IndyBooks.ViewModels.SearchResultViewModel>
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @{
     ViewBag.Title = "Admin Search";
@@ -35,7 +35,7 @@
             </td>
             <td>
                 <!-- Use the Name property of the Book's Author entity-->
-                @book.Author.Name
+                @book.AuthorName
             </td>
             <td class="rightedge">
                 @book.SKU
@@ -46,9 +46,9 @@
             <td class="rightedge">
                 <!-- TODO: Note how the book Id is set into each "Remove" link in the list -->
                 <a asp-action="DeleteBook" asp-controller="Admin"
-                   asp-route-id="@book.Id">Remove</a> | 
+                   asp-route-id="@book.BookId">Remove</a> | 
                 <!-- TODO: Add an "Update action link here-->
-                <a asp-action="UpdateBook" asp-controller="Admin" asp-route-id="@book.Id">Update</a>
+                <a asp-action="UpdateBook" asp-controller="Admin" asp-route-id="@book.BookId">Update</a>
             </td>
         </tr>
     }

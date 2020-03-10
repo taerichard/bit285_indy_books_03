@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using IndyBooks.Models;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace IndyBooks.ViewModels
 {
@@ -16,7 +17,7 @@ namespace IndyBooks.ViewModels
         public String Name { get; set; }
 
         //Add properties to support a Writer's SelectList (Id and Writers)
-        public IEnumerable<Writer> Writers { get; set; }
+        public IEnumerable<SelectListItem> Writers { get; set; }
         public long? AuthorId { get; set; }
     }
 }
